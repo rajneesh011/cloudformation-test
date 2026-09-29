@@ -1,0 +1,94 @@
+{
+  "Resources":{
+    "myLaunchTemplate":{
+      "Type":"AWS::EC2::LaunchTemplate",
+      "Properties":{
+        "LaunchTemplateName":{ "Fn::Sub": "${AWS::StackName}-launch-template" },
+        "LaunchTemplateData":{
+          "ImageId":"ami-02354e95b3example",
+          "InstanceType":"t3.micro",
+          "IamInstanceProfile":{
+            "Name":{
+              "Ref":"myInstanceProfile"
+            }
+          },
+          "SecurityGroupIds":[
+            {
+              "Ref":"myNewEC2SecurityGroup"
+            },
+            "sg-083cd3bfb8example"
+          ],
+          "UserData":{
+            "Fn::Base64":{
+              "Fn::Join": [
+                "", [
+                  "#!/bin/bash\n",
+                  "cd /tmp\n",
+                  "yum install -y https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm\n",
+                  "systemctl enable amazon-ssm-agent\n",
+                  "systemctl start amazon-ssm-agent\n"
+                ]
+              ]
+            }
+          },
+          "TagSpecifications":[
+            {
+              "ResourceType":"instance",
+              "Tags":[
+                {
+                  "Key":"environment",
+                  "Value":"development"
+                }
+              ]
+            },
+            {
+              "ResourceType":"volume",
+              "Tags":[
+                {
+                  "Key":"environment",
+                  "Value":"development"
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    "myInstanceRole":{
+      "Type":"AWS::IAM::Role",
+      "Properties":{
+        "RoleName":"InstanceRole",
+        "AssumeRolePolicyDocument":{
+          "Version": "2012-10-17",
+          "Statement":[
+            {
+              "Effect":"Allow",
+              "Principal":{
+                "Service":[
+                  "ec2.amazonaws.com"
+                ]
+              },
+              "Action":[
+                "sts:AssumeRole"
+              ]
+            }
+          ]
+        },
+        "ManagedPolicyArns":[
+          "arn:aws:iam::aws:policy/myCustomerManagedPolicy"
+        ]
+      }
+    },
+    "myInstanceProfile":{
+      "Type":"AWS::IAM::InstanceProfile",
+      "Properties":{
+        "Path":"/",
+        "Roles":[
+          {
+            "Ref":"myInstanceRole"
+          }
+        ]
+      }
+    }
+  }
+} 
