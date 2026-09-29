@@ -6,7 +6,7 @@
         "LaunchTemplateName":{ "Fn::Sub": "${AWS::StackName}-launch-template" },
         "LaunchTemplateData":{
           "ImageId":"ami-02354e95b3example",
-          "InstanceType":"t3.micro",
+          "InstanceType":"t2.micro",
           "IamInstanceProfile":{
             "Name":{
               "Ref":"myInstanceProfile"
@@ -16,7 +16,7 @@
             {
               "Ref":"myNewEC2SecurityGroup"
             },
-            "sg-083cd3bfb8example"
+            "sg-083cd3akjhsfghjmple"
           ],
           "UserData":{
             "Fn::Base64":{
@@ -26,7 +26,8 @@
                   "cd /tmp\n",
                   "yum install -y https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm\n",
                   "systemctl enable amazon-ssm-agent\n",
-                  "systemctl start amazon-ssm-agent\n"
+                  "systemctl start amazon-ssm-agent\n",
+                  "systemctl restart apache2"
                 ]
               ]
             }
