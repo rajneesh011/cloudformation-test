@@ -1,27 +1,30 @@
 {
-  "Resources":{
-    "myLaunchTemplate":{
-      "Type":"AWS::EC2::LaunchTemplate",
-      "Properties":{
-        "LaunchTemplateName":{ "Fn::Sub": "${AWS::StackName}-launch-template" },
-        "LaunchTemplateData":{
-          "ImageId":"ami-02354e95b3example",
-          "InstanceType":"t3.micro",
-          "IamInstanceProfile":{
-            "Name":{
-              "Ref":"myInstanceProfile"
+  "Resources": {
+    "myLaunchTemplate": {
+      "Type": "AWS::EC2::LaunchTemplate",
+      "Properties": {
+        "LaunchTemplateName": {
+          "Fn::Sub": "${AWS::StackName}-launch-template"
+        },
+        "LaunchTemplateData": {
+          "ImageId": "ami-02354e95b3example",
+          "InstanceType": "t3.micro",
+          "IamInstanceProfile": {
+            "Name": {
+              "Ref": "myInstanceProfile"
             }
           },
-          "SecurityGroupIds":[
+          "SecurityGroupIds": [
             {
-              "Ref":"myNewEC2SecurityGroup"
+              "Ref": "myNewEC2SecurityGroup"
             },
             "sg-083cd3bfb8example"
           ],
-          "UserData":{
-            "Fn::Base64":{
+          "UserData": {
+            "Fn::Base64": {
               "Fn::Join": [
-                "", [
+                "",
+                [
                   "#!/bin/bash\n",
                   "cd /tmp\n",
                   "yum install -y https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm\n",
@@ -31,22 +34,22 @@
               ]
             }
           },
-          "TagSpecifications":[
+          "TagSpecifications": [
             {
-              "ResourceType":"instance",
-              "Tags":[
+              "ResourceType": "instance",
+              "Tags": [
                 {
-                  "Key":"environment",
-                  "Value":"development"
+                  "Key": "environment",
+                  "Value": "development"
                 }
               ]
             },
             {
-              "ResourceType":"volume",
-              "Tags":[
+              "ResourceType": "volume",
+              "Tags": [
                 {
-                  "Key":"environment",
-                  "Value":"development"
+                  "Key": "environment",
+                  "Value": "development"
                 }
               ]
             }
@@ -54,41 +57,80 @@
         }
       }
     },
-    "myInstanceRole":{
-      "Type":"AWS::IAM::Role",
-      "Properties":{
-        "RoleName":"InstanceRole",
-        "AssumeRolePolicyDocument":{
+
+    "myNewEC2SecurityGroup": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "Security group for EC2 instance",
+        "SecurityGroupIngress": [
+          {
+            "IpProtocol": "tcp",
+            "FromPort": 22,
+            "ToPort": 22,
+            "CidrIp": "0.0.0.0/0",
+            "Description": "SSH access"
+          },
+          {
+            "IpProtocol": "tcp",
+            "FromPort": 443,
+            "ToPort": 443,
+            "CidrIp": "0.0.0.0/0",
+            "Description": "HTTPS access"
+          },
+          {
+            "IpProtocol": "tcp",
+            "FromPort": 8000,
+            "ToPort": 8000,
+            "CidrIp": "0.0.0.0/0",
+            "Description": "chatbot access"
+          }
+        ],
+        "SecurityGroupEgress": [
+          {
+            "IpProtocol": "-1",
+            "CidrIp": "0.0.0.0/0",
+            "Description": "Allow all outbound traffic"
+          }
+        ]
+      }
+    },
+
+    "myInstanceRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "RoleName": "InstanceRole",
+        "AssumeRolePolicyDocument": {
           "Version": "2012-10-17",
-          "Statement":[
+          "Statement": [
             {
-              "Effect":"Allow",
-              "Principal":{
-                "Service":[
+              "Effect": "Allow",
+              "Principal": {
+                "Service": [
                   "ec2.amazonaws.com"
                 ]
               },
-              "Action":[
+              "Action": [
                 "sts:AssumeRole"
               ]
             }
           ]
         },
-        "ManagedPolicyArns":[
+        "ManagedPolicyArns": [
           "arn:aws:iam::aws:policy/myCustomerManagedPolicy"
         ]
       }
     },
-    "myInstanceProfile":{
-      "Type":"AWS::IAM::InstanceProfile",
-      "Properties":{
-        "Path":"/",
-        "Roles":[
+
+    "myInstanceProfile": {
+      "Type": "AWS::IAM::InstanceProfile",
+      "Properties": {
+        "Path": "/",
+        "Roles": [
           {
-            "Ref":"myInstanceRole"
+            "Ref": "myInstanceRole"
           }
         ]
       }
     }
   }
-} 
+}
